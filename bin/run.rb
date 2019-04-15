@@ -1,10 +1,20 @@
 require_relative '../config/environment'
 
-# puts mallory = User.find_by(name: "Mallory")
-# puts mallory.zodiacs
+mallory = User.find_by(name: "Mallory")
+gino = User.find_by(name: "Gino")
+luka = User.find_by(name: "Luka")
 #
-# sag = Zodiac.find_by(sun_sign: "Sagittarius")
+# sag = Zodiac.find_by(mood: "Sagittarius")
 #
-# binding.pry
+
+# def test
+#   mallory.horoscopes.each do |i|
+#
+#     binding.pry
+#   end
+# end
+
+
+binding.pry
 
 puts "HELLO WORLD"
