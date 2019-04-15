@@ -18,6 +18,6 @@ anger2 = Horoscope.create(mood: "Anger", horoscope_template: "Here's your horosc
 
 
 # #
-Favorite.create(user_id: mallory.id, horoscope_id: happy.id)
-Favorite.create(user_id: mallory.id, horoscope_id: anger1.id)
-Favorite.create(user_id: mallory.id, horoscope_id: anger2.id)
+Favorite.create(user_id: mallory.id, horoscope_id: happy.id, horoscope_mood: "Happy")
+Favorite.create(user_id: mallory.id, horoscope_id: anger1.id, horoscope_mood: "Anger")
+Favorite.create(user_id: mallory.id, horoscope_id: anger2.id, horoscope_mood: "Anger")

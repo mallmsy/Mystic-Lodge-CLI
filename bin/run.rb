@@ -1,5 +1,7 @@
 require_relative '../config/environment'
 
+#$VERBOSE = nil
+
 mallory = User.find_by(name: "Mallory")
 gino = User.find_by(name: "Gino")
 luka = User.find_by(name: "Luka")
@@ -55,7 +57,7 @@ def login_menu
           welcome
         else
           @@current_user = User.find_by(name: username)
-#          main_menu
+          main_menu
         end
       end
     end
@@ -109,6 +111,64 @@ def signup_menu
   binding.pry
   main_menu
   end
+end
+  ### end of signup screen
+
+  ### start of main menu screen
+def main_menu
+  system("clear")
+
+  prompt = TTY::Prompt.new
+  main_selection = prompt.select("Pick your poison") do |option|
+    option.choice 'View Daily Horoscope', 1
+    option.choice 'Make Your Own Horoscope', 2
+    option.choice 'View Your Favorites', 3
+    option.choice 'Exit', 4
+  end
+
+  case main_selection
+  when 1
+    daily_horoscope
+  when 2
+    make_horoscope
+  when 3
+    view_favorites
+  when 4
+    exit_cli
+  end
+end
+### end of main menu screen
+
+### start of daily_horoscope screen
+def daily_horoscope
+  system("clear")
+
+  prompt = TTY::Prompt.new
+
+  fetched_horoscope = @@current_user.h_daily
+
+  puts "Hey #{@@current_user.name} I see that you are a #{@@current_user.sign}. Here is your current horoscope of the day."
+  puts ""
+  puts fetched_horoscope
+  puts ""
+
+  daily_selection = prompt.yes?("Would you like to save this?")
+    # begin
+    #   raise PromptConversionError
+    # rescue PromptConversionError => error
+    #   puts error.message
+    #
+    # class PromptConversionError < StandardError
+    #   def message
+    #     "You must enter either 'yes' or 'no'."
+    #   end
+    # end
+  if daily_selection
+    mood_assignment = prompt.ask("Give your horoscope a mood.")
+    Favorite.create(user_id: @@current_user.id, saved_horoscope: fetched_horoscope, horoscope_mood: mood_assignment)
+  end
+  #binding.pry
+    #Favorite.create(user_id: mallory.id, horoscope_id: happy.id)
 end
 
 

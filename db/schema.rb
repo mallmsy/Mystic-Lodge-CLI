@@ -16,6 +16,7 @@ ActiveRecord::Schema.define(version: 2019_04_14_152037) do
     t.integer "user_id"
     t.integer "horoscope_id"
     t.string "saved_horoscope"
+    t.string "horoscope_mood"
   end
 
   create_table "horoscopes", force: :cascade do |t|
