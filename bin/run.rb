@@ -54,7 +54,8 @@ def login_menu
           sleep 2
           welcome
         else
-          main_menu
+          @@current_user = User.find_by(name: username)
+#          main_menu
         end
       end
     end
@@ -84,10 +85,29 @@ def signup_menu
         welcome
       end
     end
-  user_birthyear = key(:birthdate).ask("Enter your birth year. (YYYY)")
-  user_password = key(:password).mask("Enter a password.", required: true, mask: crystal)
+  user_birthdate = key(:birthdate).ask("Enter your birth year. (YYYY/MM/DD)")
+  bday_split = user_birthdate.split("/")
+  bday_boolean = Date.valid_date?(bday_split[0].to_i,bday_split[1].to_i,bday_split[2].to_i)
 
-  #main_menu
+  if !bday_boolean
+    counter = 3
+    until counter == 1 || bday_boolean
+      puts "Oops! That doesn't appear to be a valid date. Please check your format and try again."
+      counter -= 1
+      user_birthdate = key(:birthdate).ask("Enter your birth year. (YYYY/MM/DD). You have #{counter} attempt(s) left.")
+      bday_split = user_birthdate.split("/")
+      bday_boolean = Date.valid_date?(bday_split[0].to_i,bday_split[1].to_i,bday_split[2].to_i)
+    end
+    if counter == 1
+      puts "Sorry, that doesn't appear to be a valid date. Take a moment to check your calendar and try again. Returning to menu."
+      sleep 2
+      welcome
+    end
+  end
+  user_password = key(:password).mask("Enter a password.", required: true, mask: crystal)
+  @@current_user = User.create(name: username, password: user_password, birthdate: user_birthdate, sign: nil)
+  binding.pry
+  main_menu
   end
 end
 
