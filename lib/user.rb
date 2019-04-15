@@ -27,10 +27,6 @@ class User < ActiveRecord::Base
 
     #url = Nokogiri::HTML(open("http://theastrologer-api.herokuapp.com/api/horoscope/#{sun_sign}/today"))
     #url_hash = JSON.parse(url)
-
-    binding.pry
-
-
     return s_parse
   end
 

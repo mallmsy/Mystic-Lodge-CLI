@@ -6,9 +6,9 @@ Favorite.reset_pk_sequence
 User.reset_pk_sequence
 Horoscope.reset_pk_sequence
 
-mallory = User.create(name: "Mallory", birthdate: "1988-12-15", sign: "Sagittarius")
-gino = User.create(name: "Gino", birthdate: "1991-06-28", sign: "Cancer")
-luka = User.create(name: "Luka", birthdate: "1993-02-01", sign: "Aquarius")
+mallory = User.create(name: "Mallory", password: "password", birthdate: "1988-12-15", sign: "Sagittarius")
+gino = User.create(name: "Gino", password: "password", birthdate: "1991-06-28", sign: "Cancer")
+luka = User.create(name: "Luka", password: "password", birthdate: "1993-02-01", sign: "Aquarius")
 # #
 # #
 love = Horoscope.create(mood: "Love", horoscope_template: "Here's your horoscope, Leo!")
