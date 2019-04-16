@@ -3,16 +3,37 @@ class User < ActiveRecord::Base
   has_many :favorites
   has_many :horoscopes, through: :favorites
 
+
+
   def m_list(mood_name)
-    self.horoscopes.select do |i|
-      i.mood.downcase == mood_name.downcase
-    end
+    self.favorites.select do |horo|
+      horo.horoscope_mood == mood_name
+      end
   end
 
+  def display_mood_list(temp_mood_list)
+      temp_mood_list.each_with_index do |h_scope, ind|
+      puts "#{ind + 1}. Mood: #{h_scope.horoscope_mood}"
+      puts "#{h_scope.saved_horoscope}"
+      puts ""
+      end
+  end
+
+
+
   def m_list_uniq
-    self.horoscopes.map do |i|
-      i.mood
+    self.favorites.map do |i|
+      i.horoscope_mood
     end.uniq
+  end
+
+
+  def mood_menu_hash
+    mm_hash = {}
+    self.m_list_uniq.each do |mood|
+      mm_hash[mood] = mood
+    end
+    mm_hash
   end
 
   def h_daily
@@ -30,6 +51,12 @@ class User < ActiveRecord::Base
     return s_parse
   end
 
-#test_html('pisces')
+  def list_all_favorites
+    self.favorites.each_with_index do |h_scope, ind|
+      puts "#{ind + 1}. Mood: #{h_scope.horoscope_mood}"
+      puts "#{h_scope.saved_horoscope}"
+      puts ""
+      end
+  end
 
 end

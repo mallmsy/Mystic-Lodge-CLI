@@ -3,6 +3,7 @@ Bundler.require
 require 'json'
 require 'open-uri'
 require 'date'
+require 'colorize'
 
 ActiveRecord::Base.establish_connection(adapter: 'sqlite3', database: 'db/development.db')
 ActiveRecord::Base.logger = Logger.new(nil)
