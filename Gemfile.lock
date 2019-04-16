@@ -19,6 +19,7 @@ GEM
     domain_name (0.5.20180417)
       unf (>= 0.0.5, < 1.0.0)
     equatable (0.5.0)
+    funtimes (0.4.0)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
     i18n (1.6.0)
@@ -79,6 +80,9 @@ GEM
       unf_ext
     unf_ext (0.0.7.5)
     wisper (2.0.0)
+    zodiac (0.2.10)
+      funtimes
+      i18n
 
 PLATFORMS
   ruby
@@ -92,6 +96,7 @@ DEPENDENCIES
   sinatra-activerecord
   sqlite3
   tty-prompt
+  zodiac
 
 BUNDLED WITH
    1.17.3

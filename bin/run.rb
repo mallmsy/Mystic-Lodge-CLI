@@ -15,6 +15,15 @@ luka = User.find_by(name: "Luka")
 #     binding.pry
 #   end
 # end
+def birthdate_validate(birthdate)
+  bday_split = birthdate.split("/")
+  return Date.valid_date?(bday_split[0].to_i,bday_split[1].to_i,bday_split[2].to_i)
+end
+
+def find_zodiac_sign(birthdate)
+  bday_split = birthdate.split("/")
+  return Date.new(bday_split[0].to_i,bday_split[1].to_i,bday_split[2].to_i).zodiac_sign
+end
 
 ### start of welcome screen
 def welcome
@@ -88,27 +97,28 @@ def signup_menu
       end
     end
   user_birthdate = key(:birthdate).ask("Enter your birth year. (YYYY/MM/DD)")
-  bday_split = user_birthdate.split("/")
-  bday_boolean = Date.valid_date?(bday_split[0].to_i,bday_split[1].to_i,bday_split[2].to_i)
+  bday_boolean = birthdate_validate(user_birthdate)
 
   if !bday_boolean
     counter = 3
-    until counter == 1 || bday_boolean
+    until bday_boolean
+      if counter == 1
+        puts "Sorry, that doesn't appear to be a valid date. Take a moment to check your calendar and try again. Returning to menu."
+        sleep 2
+        welcome
+      end
+
       puts "Oops! That doesn't appear to be a valid date. Please check your format and try again."
       counter -= 1
       user_birthdate = key(:birthdate).ask("Enter your birth year. (YYYY/MM/DD). You have #{counter} attempt(s) left.")
-      bday_split = user_birthdate.split("/")
-      bday_boolean = Date.valid_date?(bday_split[0].to_i,bday_split[1].to_i,bday_split[2].to_i)
-    end
-    if counter == 1
-      puts "Sorry, that doesn't appear to be a valid date. Take a moment to check your calendar and try again. Returning to menu."
-      sleep 2
-      welcome
+      bday_boolean = birthdate_validate(user_birthdate)
+
     end
   end
+  user_sign = find_zodiac_sign(user_birthdate)
   user_password = key(:password).mask("Enter a password.", required: true, mask: crystal)
-  @@current_user = User.create(name: username, password: user_password, birthdate: user_birthdate, sign: nil)
-  binding.pry
+  @@current_user = User.create(name: username, password: user_password, birthdate: user_birthdate, sign: user_sign)
+
   main_menu
   end
 end
@@ -152,25 +162,33 @@ def daily_horoscope
   puts fetched_horoscope
   puts ""
 
-  daily_selection = prompt.yes?("Would you like to save this?")
-    # begin
-    #   raise PromptConversionError
-    # rescue PromptConversionError => error
-    #   puts error.message
-    #
-    # class PromptConversionError < StandardError
-    #   def message
-    #     "You must enter either 'yes' or 'no'."
-    #   end
-    # end
-  if daily_selection
+  daily_selection = prompt.select("Do you want to save?", %w(Yes No))
+
+  if daily_selection == "Yes"
     mood_assignment = prompt.ask("Give your horoscope a mood.")
     Favorite.create(user_id: @@current_user.id, saved_horoscope: fetched_horoscope, horoscope_mood: mood_assignment)
+    puts "How insightful, #{@@current_user.name}. We've saved this to your favorites."
+    sleep 2
+    main_menu
+  else
+    puts "Returning to menu."
+    sleep 2
+    main_menu
   end
   #binding.pry
     #Favorite.create(user_id: mallory.id, horoscope_id: happy.id)
 end
+### end of daily_horoscope screen
 
+### start of exit screen
+
+def exit_cli
+  system("clear")
+  puts "May the great spirit guide you... 💫 ✨ 🌙"
+  sleep 2
+  system("clear")
+  system("^C")
+end
 
 welcome
 
