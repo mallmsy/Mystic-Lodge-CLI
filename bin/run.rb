@@ -60,7 +60,8 @@ end
 def welcome
   system("clear")
   font = TTY::Font.new(:doom)
-  puts font.write("Mystic Lodge").light_blue
+  puts font.write("Mystic").light_blue
+  puts font.write("Lodge").light_blue
   puts ""
 
   prompt = TTY::Prompt.new
@@ -289,9 +290,11 @@ def view_favorites
     sleep 2
     @@current_user.reload
     main_menu
+
+
    when 2
 ### START UPDATE SECTION
-    fav_update_selection = prompt.ask("Which favorite would you like to update?").light_blue.bold
+    fav_update_selection = prompt.ask("Which favorite would you like to update?".light_blue.bold)
     if fav_update_selection.to_i > @@current_user.favorites.length || fav_update_selection.to_i == 0
       system("clear")
       puts "That doesn't seem to be a valid selection. Please try again.".light_yellow
@@ -346,29 +349,6 @@ def view_favorites
       end
   end
 
-    case update_choices
-    when 1
-       system("clear")
-       temp_daily = @@current_user.h_daily
-       puts temp_daily
-       daily_update_selection = prompt.select("Do you want to save this wisdom?".light_blue.bold, %w(Yes No), active_color: :cyan)
-       if daily_update_selection == "Yes"
-         system("clear")
-         temp_mood_assignment = mood_menu
-         system("clear")
-         favorite_to_be_updated = Favorite.find_by(id: update_id)
-         favorite_to_be_updated.update(saved_horoscope: temp_daily, horoscope_mood: temp_mood_assignment)
-         puts "Oh yes, another profound insight. We've saved this to your favorites. Returning to the lobby.".light_yellow
-         sleep 2
-         @@current_user.reload
-         view_favorites
-       else
-         system("clear")
-         puts "That wasn't to our liking either. Returning to the lobby.".light_yellow
-         sleep 2
-         view_favorites
-       end
-    end
 ### START VIEW BY MOOD SECTION
    when 3
      system("clear")
