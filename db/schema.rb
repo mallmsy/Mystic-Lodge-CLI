@@ -20,7 +20,6 @@ ActiveRecord::Schema.define(version: 2019_04_14_152037) do
   end
 
   create_table "horoscopes", force: :cascade do |t|
-    t.string "mood"
     t.string "horoscope_template"
   end
 

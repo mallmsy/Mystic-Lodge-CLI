@@ -2,7 +2,6 @@ require_relative '../config/environment'
 
 $VERBOSE = nil
 
-
 # COLOR GUIDE
   # HEADER: .light_blue.bold
   # NARRATOR: .light_yellow
@@ -24,11 +23,43 @@ def mood_menu
   prompt.select("What emotion does this make you feel?".light_blue.bold, %w(Joy Trust Fear Surprise Sadness Disgust Anger Anticipation), active_color: :cyan)
 end
 
+def populate_template
+  prompt = TTY::Prompt.new
+
+  template_sign = @@current_user.sign
+  planet = prompt.ask('Enter your favorite PLANET:')
+  noun = prompt.ask('Enter a NOUN (names a person, place, thing, or idea):')
+  adjective = prompt.ask('Enter an ADJECTIVE (this gives info about size, shape, age, color, material):')
+  verb = prompt.ask('Enter a VERB (describes an action or occurance):')
+  adverb = prompt.ask('Enter an ADVERB (this describes a verb or adjective and often end in -ly):')
+
+  completed_template = template_smush(template_sign, planet, adverb, adjective, verb, noun)
+  system("clear")
+  puts "Creating your horoscope now."
+  sleep 3
+  system("clear")
+  completed_template
+end
+
+def updated_template_smush(template_sign, planet, adverb, adjective, verb, noun, favorite_id)
+  @@update_template = Horoscope.find_by(id: favorite_id)
+  template_text = @@update_template.horoscope_template
+  ERB.new(template_text).result(binding)
+end
+
+def template_smush(template_sign, planet, adverb, adjective, verb, noun)
+  @@random_template = Horoscope.all.sample
+  template_text = @@random_template.horoscope_template
+  ERB.new(template_text).result(binding)
+end
+
+
+
 ### start of welcome screen
 def welcome
   system("clear")
-  # font = TTY::Font.new(:standard)
-  # puts font.write("WELCOME", letter_spacing: 1).light_blue
+  font = TTY::Font.new(:standard)
+  puts font.write("GINO IS #3", letter_spacing: 1).light_blue
 
 
   prompt = TTY::Prompt.new
@@ -153,7 +184,14 @@ def main_menu
   when 2
     make_horoscope
   when 3
-    view_favorites
+    if @@current_user.favorites.empty?
+      system("clear")
+      puts "Looks like you don't have any favorites, traveler. Returning to lobby."
+      sleep 2
+      main_menu
+    else
+      view_favorites
+    end
   when 4
     exit_cli
   end
@@ -191,6 +229,35 @@ def daily_horoscope
 end
 ### end of daily_horoscope screen
 
+### start of make_horoscope screen
+
+def make_horoscope
+  system("clear")
+  prompt = TTY::Prompt.new
+
+  puts "Let's create a new horoscope. Enter keywords below."
+
+  puts finished_template = populate_template
+
+  save_template_selection = prompt.select('Would you like to save this wisdom?', %w(Yes No))
+  if save_template_selection == "Yes"
+    system("clear")
+    mood_assignment = mood_menu
+    system("clear")
+    Favorite.create(user_id: @@current_user.id, horoscope_id: @@random_template.id, saved_horoscope: finished_template, horoscope_mood: mood_assignment)
+    puts "Very insightful, #{@@current_user.name}. We've saved this to your favorites."
+    sleep 2
+    @@current_user.reload
+    main_menu
+  else
+    system("clear")
+    puts "We didn't much like that one either. Returning to the lobby.".light_yellow
+    sleep 2
+    main_menu
+  end
+end
+### end of make_horoscope screen
+
 ### start of view_favorites screen
 def view_favorites
   system("clear")
@@ -209,9 +276,15 @@ def view_favorites
 ### START DELETE SECTION
    when 1
     fav_delete_selection = prompt.ask("Which favorite would you like to delete? Enter the number:")
+      if fav_delete_selection.to_i > @@current_user.favorites.length || fav_delete_selection.to_i == 0
+        system("clear")
+        puts "That doesn't seem to be a valid selection. Please try again."
+        sleep 2
+        view_favorites
+      end
     del_id = @@current_user.favorites[fav_delete_selection.to_i - 1].id
     Favorite.destroy(del_id)
-    systme("clear")
+    system("clear")
     puts "We didn't like that one anyway. Returning to the lobby."
     sleep 2
     @@current_user.reload
@@ -219,12 +292,59 @@ def view_favorites
    when 2
 ### START UPDATE SECTION
     fav_update_selection = prompt.ask("Which favorite would you like to update?")
+    if fav_update_selection.to_i > @@current_user.favorites.length || fav_update_selection.to_i == 0
+      system("clear")
+      puts "That doesn't seem to be a valid selection. Please try again."
+      sleep 2
+      view_favorites
+    end
     system("clear")
     update_id = @@current_user.favorites[fav_update_selection.to_i - 1].id
-    update_choices = prompt.select("How do you want to update?") do |up_choice|
-      up_choice.choice 'New Daily', 1
-      up_choice.choice 'Create New', 2
-    end
+    temp_fav = Favorite.find_by(id: update_id)
+    if !temp_fav.horoscope_id
+      temp_fav_mood_assignment = mood_menu
+      fav_to_be_updated = Favorite.find_by(id: update_id)
+      fav_to_be_updated.update(horoscope_mood: temp_fav_mood_assignment)
+      puts "Oh yes, another profound insight. We've saved this to your favorites. Returning to the lobby."
+      sleep 2
+      @@current_user.reload
+      view_favorites
+    else
+      prompt = TTY::Prompt.new
+
+      template_sign = @@current_user.sign
+      planet = prompt.ask('Enter your favorite PLANET:')
+      noun = prompt.ask('Enter a NOUN (names a person, place, thing, or idea):')
+      adjective = prompt.ask('Enter an ADJECTIVE (this gives info about size, shape, age, color, material):')
+      verb = prompt.ask('Enter a VERB (describes an action or occurance):')
+      adverb = prompt.ask('Enter an ADVERB (this describes a verb or adjective and often end in -ly):')
+
+      completed_template = updated_template_smush(template_sign, planet, adverb, adjective, verb, noun, temp_fav.horoscope_id)
+
+      system("clear")
+      puts "Updating your horoscope now."
+      sleep 3
+      system("clear")
+      puts completed_template
+
+      save_template_selection = prompt.select('Would you like to save this wisdom?', %w(Yes No))
+      if save_template_selection == "Yes"
+        system("clear")
+        mood_assignment = mood_menu
+        system("clear")
+        fav_temp_to_be_updated = Favorite.find_by(id: update_id)
+        fav_temp_to_be_updated.update(saved_horoscope: completed_template, horoscope_mood: mood_assignment)
+        puts "Very insightful, #{@@current_user.name}. We've saved this to your favorites."
+        sleep 2
+        @@current_user.reload
+        main_menu
+      else
+        system("clear")
+        puts "We didn't much like that one either. Returning to the lobby.".light_yellow
+        sleep 2
+        main_menu
+      end
+  end
 
     case update_choices
     when 1
