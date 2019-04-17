@@ -126,14 +126,14 @@ def signup_menu
     if User.find_by(name: username)
       counter = 3
       until counter == 1 || !User.find_by(name: username)
+        if counter == 1
+          puts "Sorry traveler, those usernames are taken. Take a moment to think of a new one. Returning to the lobby.".light_yellow
+          sleep 3
+          welcome
+        end
         puts "I'm sorry, traveler. That username is taken. Try again.".light_yellow
         counter -= 1
         username = key(:name).ask("Enter a username. You have #{counter} attempt(s) left.".light_yellow, active_color: :cyan, required: true)
-      end
-      if counter == 1
-        puts "Sorry traveler, those usernames are taken. Take a moment to think of a new one. Returning to the lobby.".light_yellow
-        sleep 3
-        welcome
       end
     end
   user_birthdate = key(:birthdate).ask("Enter your full birthdate (YYYY/MM/DD):".light_blue.bold, active_color: :cyan)
