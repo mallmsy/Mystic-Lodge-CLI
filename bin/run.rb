@@ -27,15 +27,15 @@ def populate_template
   prompt = TTY::Prompt.new
 
   template_sign = @@current_user.sign
-  planet = prompt.ask('Enter your favorite PLANET:')
-  noun = prompt.ask('Enter a NOUN (names a person, place, thing, or idea):')
-  adjective = prompt.ask('Enter an ADJECTIVE (this gives info about size, shape, age, color, material):')
-  verb = prompt.ask('Enter a VERB (describes an action or occurance):')
-  adverb = prompt.ask('Enter an ADVERB (this describes a verb or adjective and often end in -ly):')
+  planet = prompt.ask('Enter your favorite PLANET:'.light_blue.bold, active_color: :cyan)
+  noun = prompt.ask('Enter a NOUN (names a person, place, thing, or idea):'.light_blue.bold, active_color: :cyan)
+  adjective = prompt.ask('Enter an ADJECTIVE (this gives info about size, shape, age, color, material):'.light_blue.bold, active_color: :cyan)
+  verb = prompt.ask('Enter a VERB (describes an action or occurance):'.light_blue.bold, active_color: :cyan)
+  adverb = prompt.ask('Enter an ADVERB (this describes a verb or adjective and often end in -ly):'.light_blue.bold, active_color: :cyan)
 
   completed_template = template_smush(template_sign, planet, adverb, adjective, verb, noun)
   system("clear")
-  puts "Creating your horoscope now."
+  puts "Creating your horoscope now.".light_yellow
   sleep 3
   system("clear")
   completed_template
@@ -53,18 +53,19 @@ def template_smush(template_sign, planet, adverb, adjective, verb, noun)
   ERB.new(template_text).result(binding)
 end
 
+#//// BEGIN PROGRAM //////
 
+# start of welcome screen
 
-### start of welcome screen
 def welcome
   system("clear")
-  font = TTY::Font.new(:standard)
-  puts font.write("GINO IS #3", letter_spacing: 1).light_blue
-
+  font = TTY::Font.new(:doom)
+  puts font.write("Mystic Lodge").light_blue
+  puts ""
 
   prompt = TTY::Prompt.new
 
-  puts "🌙 🌙".blink + " || M Y S T I C  L O D G E || ".light_blue.bold + "🌙 🌙".blink
+  puts "🌙 🌙".blink + " || W E L C O M E || ".light_blue.bold + "🌙 🌙".blink
   puts ""
   puts "Greetings, Cosmic Travler! Welcome to The Mystic Lodge.".light_yellow
   puts ""
@@ -121,13 +122,13 @@ def signup_menu
   crystal = prompt.decorate('🔮 ')
   prompt.collect do
 
-  username = key(:name).ask("Enter a username:", required: true)
+  username = key(:name).ask("Enter a username:".light_blue.bold, active_color: :cyan, required: true)
     if User.find_by(name: username)
       counter = 3
       until counter == 1 || !User.find_by(name: username)
         puts "I'm sorry, traveler. That username is taken. Try again.".light_yellow
         counter -= 1
-        username = key(:name).ask("Enter a username. You have #{counter} attempt(s) left.".light_yellow, required: true)
+        username = key(:name).ask("Enter a username. You have #{counter} attempt(s) left.".light_yellow, active_color: :cyan, required: true)
       end
       if counter == 1
         puts "Sorry traveler, those usernames are taken. Take a moment to think of a new one. Returning to the lobby.".light_yellow
@@ -135,27 +136,27 @@ def signup_menu
         welcome
       end
     end
-  user_birthdate = key(:birthdate).ask("Enter your full birthdate (YYYY/MM/DD):")
+  user_birthdate = key(:birthdate).ask("Enter your full birthdate (YYYY/MM/DD):".light_blue.bold, active_color: :cyan)
   bday_boolean = birthdate_validate(user_birthdate)
 
   if !bday_boolean
     counter = 3
     until bday_boolean
       if counter == 1
-        puts "Sorry, travler. That doesn't appear to be a valid date. Take a moment to check your calendar and try again. Returning to the lobby."
+        puts "Sorry, travler. That doesn't appear to be a valid date. Take a moment to check your calendar and try again. Returning to the lobby.".light_yellow
         sleep 3
         welcome
       end
 
-      puts "Sorry, travler. That doesn't appear to be a valid date. Please check your format and try again."
+      puts "Sorry, travler. That doesn't appear to be a valid date. Please check your format and try again.".light_yellow
       counter -= 1
-      user_birthdate = key(:birthdate).ask("Enter your full birthdate (YYYY/MM/DD): You have #{counter} attempt(s) left.")
+      user_birthdate = key(:birthdate).ask("Enter your full birthdate (YYYY/MM/DD): You have #{counter} attempt(s) left.".light_yellow)
       bday_boolean = birthdate_validate(user_birthdate)
 
     end
   end
   user_sign = find_zodiac_sign(user_birthdate)
-  user_password = key(:password).mask("Enter a passcode:", required: true, mask: crystal)
+  user_password = key(:password).mask("Enter a passcode:".light_blue.bold, active_color: :cyan, required: true, mask: crystal)
   @@current_user = User.create(name: username, password: user_password, birthdate: user_birthdate, sign: user_sign)
 
   main_menu
@@ -171,7 +172,7 @@ def main_menu
   puts ""
 
   prompt = TTY::Prompt.new
-  main_selection = prompt.select("Choose your own adventure:".light_blue.bold) do |option|
+  main_selection = prompt.select("Choose your own adventure:".light_blue.bold, active_color: :cyan) do |option|
     option.choice 'View Daily Horoscope', 1
     option.choice 'Make My Own Horoscope', 2
     option.choice 'View My Favorites', 3
@@ -186,7 +187,7 @@ def main_menu
   when 3
     if @@current_user.favorites.empty?
       system("clear")
-      puts "Looks like you don't have any favorites, traveler. Returning to lobby."
+      puts "Looks like you don't have any favorites, traveler. Returning to lobby.".light_yellow
       sleep 2
       main_menu
     else
@@ -209,14 +210,14 @@ def daily_horoscope
   puts fetched_horoscope
   puts ""
 
-  daily_selection = prompt.select("Would you like to save this wisdom?".light_blue.bold, %w(Yes No))
+  daily_selection = prompt.select("Would you like to save this wisdom?".light_blue.bold, %w(Yes No), active_color: :cyan)
 
   if daily_selection == "Yes"
     system("clear")
     mood_assignment = mood_menu
     system("clear")
     Favorite.create(user_id: @@current_user.id, saved_horoscope: fetched_horoscope, horoscope_mood: mood_assignment)
-    puts "Very insightful, #{@@current_user.name}. We've saved this to your favorites."
+    puts "Very insightful, #{@@current_user.name}. We've saved this to your favorites.".light_yellow
     sleep 2
     @@current_user.reload
     main_menu
@@ -235,17 +236,16 @@ def make_horoscope
   system("clear")
   prompt = TTY::Prompt.new
 
-  puts "Let's create a new horoscope. Enter keywords below."
-
+  puts "Let's create a new horoscope. Enter keywords below.".light_yellow
   puts finished_template = populate_template
 
-  save_template_selection = prompt.select('Would you like to save this wisdom?', %w(Yes No))
+  save_template_selection = prompt.select('Would you like to save this wisdom?'.light_blue.bold, %w(Yes No), active_color: :cyan)
   if save_template_selection == "Yes"
     system("clear")
     mood_assignment = mood_menu
     system("clear")
     Favorite.create(user_id: @@current_user.id, horoscope_id: @@random_template.id, saved_horoscope: finished_template, horoscope_mood: mood_assignment)
-    puts "Very insightful, #{@@current_user.name}. We've saved this to your favorites."
+    puts "Very insightful, #{@@current_user.name}. We've saved this to your favorites.".light_yellow
     sleep 2
     @@current_user.reload
     main_menu
@@ -265,7 +265,7 @@ def view_favorites
   prompt = TTY::Prompt.new
   @@current_user.list_all_favorites
 
-  favorites_selection = prompt.select("What would you like to do?") do |fav|
+  favorites_selection = prompt.select("What would you like to do?".light_blue.bold, active_color: :cyan) do |fav|
     fav.choice 'Delete A Favorite', 1
     fav.choice 'Update A Favorite', 2
     fav.choice 'View By Mood', 3
@@ -275,26 +275,26 @@ def view_favorites
    case favorites_selection
 ### START DELETE SECTION
    when 1
-    fav_delete_selection = prompt.ask("Which favorite would you like to delete? Enter the number:")
+    fav_delete_selection = prompt.ask("Which favorite would you like to delete? Enter the number:".light_blue.bold)
       if fav_delete_selection.to_i > @@current_user.favorites.length || fav_delete_selection.to_i == 0
         system("clear")
-        puts "That doesn't seem to be a valid selection. Please try again."
+        puts "That doesn't seem to be a valid selection. Please try again.".light_yellow
         sleep 2
         view_favorites
       end
     del_id = @@current_user.favorites[fav_delete_selection.to_i - 1].id
     Favorite.destroy(del_id)
     system("clear")
-    puts "We didn't like that one anyway. Returning to the lobby."
+    puts "We didn't like that one anyway. Returning to the lobby.".light_yellow
     sleep 2
     @@current_user.reload
     main_menu
    when 2
 ### START UPDATE SECTION
-    fav_update_selection = prompt.ask("Which favorite would you like to update?")
+    fav_update_selection = prompt.ask("Which favorite would you like to update?").light_blue.bold
     if fav_update_selection.to_i > @@current_user.favorites.length || fav_update_selection.to_i == 0
       system("clear")
-      puts "That doesn't seem to be a valid selection. Please try again."
+      puts "That doesn't seem to be a valid selection. Please try again.".light_yellow
       sleep 2
       view_favorites
     end
@@ -305,7 +305,7 @@ def view_favorites
       temp_fav_mood_assignment = mood_menu
       fav_to_be_updated = Favorite.find_by(id: update_id)
       fav_to_be_updated.update(horoscope_mood: temp_fav_mood_assignment)
-      puts "Oh yes, another profound insight. We've saved this to your favorites. Returning to the lobby."
+      puts "Oh yes, another profound insight. We've saved this to your favorites. Returning to the lobby.".light_yellow
       sleep 2
       @@current_user.reload
       view_favorites
@@ -313,28 +313,28 @@ def view_favorites
       prompt = TTY::Prompt.new
 
       template_sign = @@current_user.sign
-      planet = prompt.ask('Enter your favorite PLANET:')
-      noun = prompt.ask('Enter a NOUN (names a person, place, thing, or idea):')
-      adjective = prompt.ask('Enter an ADJECTIVE (this gives info about size, shape, age, color, material):')
-      verb = prompt.ask('Enter a VERB (describes an action or occurance):')
-      adverb = prompt.ask('Enter an ADVERB (this describes a verb or adjective and often end in -ly):')
+      planet = prompt.ask('Enter your favorite PLANET:'.light_blue.bold, active_color: :cyan)
+      noun = prompt.ask('Enter a NOUN (names a person, place, thing, or idea):'.light_blue.bold, active_color: :cyan)
+      adjective = prompt.ask('Enter an ADJECTIVE (this gives info about size, shape, age, color, material):'.light_blue.bold, active_color: :cyan)
+      verb = prompt.ask('Enter a VERB (describes an action or occurance):'.light_blue.bold, active_color: :cyan)
+      adverb = prompt.ask('Enter an ADVERB (this describes a verb or adjective and often end in -ly):'.light_blue.bold, active_color: :cyan)
 
       completed_template = updated_template_smush(template_sign, planet, adverb, adjective, verb, noun, temp_fav.horoscope_id)
 
       system("clear")
-      puts "Updating your horoscope now."
+      puts "Updating your horoscope now.".light_yellow
       sleep 3
       system("clear")
       puts completed_template
 
-      save_template_selection = prompt.select('Would you like to save this wisdom?', %w(Yes No))
+      save_template_selection = prompt.select('Would you like to save this wisdom?'.light_blue.bold, %w(Yes No), active_color: :cyan)
       if save_template_selection == "Yes"
         system("clear")
         mood_assignment = mood_menu
         system("clear")
         fav_temp_to_be_updated = Favorite.find_by(id: update_id)
         fav_temp_to_be_updated.update(saved_horoscope: completed_template, horoscope_mood: mood_assignment)
-        puts "Very insightful, #{@@current_user.name}. We've saved this to your favorites."
+        puts "Very insightful, #{@@current_user.name}. We've saved this to your favorites.".light_yellow
         sleep 2
         @@current_user.reload
         main_menu
@@ -351,20 +351,20 @@ def view_favorites
        system("clear")
        temp_daily = @@current_user.h_daily
        puts temp_daily
-       daily_update_selection = prompt.select("Do you want to save this wisdom?", %w(Yes No))
+       daily_update_selection = prompt.select("Do you want to save this wisdom?".light_blue.bold, %w(Yes No), active_color: :cyan)
        if daily_update_selection == "Yes"
          system("clear")
          temp_mood_assignment = mood_menu
          system("clear")
          favorite_to_be_updated = Favorite.find_by(id: update_id)
          favorite_to_be_updated.update(saved_horoscope: temp_daily, horoscope_mood: temp_mood_assignment)
-         puts "Oh yes, another profound insight. We've saved this to your favorites. Returning to the lobby."
+         puts "Oh yes, another profound insight. We've saved this to your favorites. Returning to the lobby.".light_yellow
          sleep 2
          @@current_user.reload
          view_favorites
        else
          system("clear")
-         puts "That wasn't to our liking either. Returning to the lobby."
+         puts "That wasn't to our liking either. Returning to the lobby.".light_yellow
          sleep 2
          view_favorites
        end
@@ -375,16 +375,16 @@ def view_favorites
      view_by_mood_selection = @@current_user.mood_menu_hash
     if view_by_mood_selection.length == 0
       system("clear")
-      puts "You don't have any favorites, traveler. Time to find some. Returning to the lobby."
+      puts "You don't have any favorites, traveler. Time to find some. Returning to the lobby.".light_yellow
       sleep 2
       view_favorites
     else
       system("clear")
-      temp_mood = prompt.select('Pick a mood to view.', view_by_mood_selection)
+      temp_mood = prompt.select('Pick a mood to view.'.light_blue.bold, view_by_mood_selection, active_color: :cyan)
       system("clear")
       temp_mood_horo_list = @@current_user.m_list(temp_mood)
       @@current_user.display_mood_list(temp_mood_horo_list)
-      post_mood_view = prompt.select("Return To Favorites?", %w(Yes))
+      post_mood_view = prompt.select("Return To Favorites?".light_blue.bold, %w(Yes), active_color: :cyan)
       if post_mood_view == "Yes"
         view_favorites
       end
@@ -399,6 +399,9 @@ end
 def exit_cli
   system("clear")
   puts "Thank you for visiting The Mystic Lodge".light_blue
+  puts ""
+  font = TTY::Font.new(:doom)
+  puts font.write("Mystic Lodge").light_blue
   puts ""
   puts "May the great spirit guide you... 💫 ✨ 🌙".light_blue
   sleep 2
