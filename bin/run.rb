@@ -299,7 +299,7 @@ def view_favorites
       system("clear")
       puts "That doesn't seem to be a valid selection. Please try again.".light_yellow
       sleep 2
-      view_favorites
+      return view_favorites
     end
     system("clear")
     update_id = @@current_user.favorites[fav_update_selection.to_i - 1].id
