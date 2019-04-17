@@ -64,6 +64,7 @@ GEM
     timers (4.3.0)
     tty-color (0.4.3)
     tty-cursor (0.6.1)
+    tty-font (0.3.0)
     tty-prompt (0.18.1)
       necromancer (~> 0.4.0)
       pastel (~> 0.7.0)
@@ -97,6 +98,7 @@ DEPENDENCIES
   rest-client
   sinatra-activerecord
   sqlite3
+  tty-font
   tty-prompt
   zodiac
 
