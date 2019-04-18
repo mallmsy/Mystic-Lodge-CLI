@@ -30,7 +30,7 @@ end
 def populate_template
   prompt = TTY::Prompt.new
 
-  template_sign = @@current_user.sign
+  template_sign = $current_user.sign
   planet = prompt.ask('Enter your favorite PLANET:'.light_blue.bold, active_color: :cyan)
   noun = prompt.ask('Enter a NOUN (names a person, place, thing, or idea):'.light_blue.bold, active_color: :cyan)
   adjective = prompt.ask('Enter an ADJECTIVE (this gives info about size, shape, age, color, material):'.light_blue.bold, active_color: :cyan)
@@ -39,8 +39,16 @@ def populate_template
 
   completed_template = template_smush(template_sign, planet, adverb, adjective, verb, noun)
   system("clear")
-  puts "Creating your horoscope now.".light_yellow
-  sleep 3
+  puts "Creating your horoscope now...".light_yellow
+  sleep 1
+  puts "🔮"
+  sleep 1
+  puts ""
+  puts "🔮"
+  sleep 1
+  puts ""
+  puts "🔮"
+  sleep 1
   system("clear")
   completed_template
 end
@@ -109,7 +117,7 @@ def login_menu
           welcome
         else
           # if both username and password match what is stored, move on to Main Menu
-          @@current_user = User.find_by(name: username)
+          $current_user = User.find_by(name: username)
           main_menu
         end
       end
@@ -165,7 +173,7 @@ def signup_menu
   user_sign = find_zodiac_sign(user_birthdate)
   # store user password
   user_password = key(:password).mask("Enter a passcode:".light_blue.bold, active_color: :cyan, required: true, mask: crystal)
-  @@current_user = User.create(name: username, password: user_password, birthdate: user_birthdate, sign: user_sign)
+  $current_user = User.create(name: username, password: user_password, birthdate: user_birthdate, sign: user_sign)
   main_menu
   end
 end
@@ -194,7 +202,7 @@ def main_menu
   when 2
     make_horoscope
   when 3
-    if @@current_user.favorites.empty?
+    if $current_user.favorites.empty?
       system("clear")
       puts "Looks like you don't have any favorites, traveler. Returning to lobby.".light_yellow
       sleep 2
@@ -213,9 +221,9 @@ def daily_horoscope
   system("clear")
 
   prompt = TTY::Prompt.new
-  fetched_horoscope = @@current_user.h_daily
-  Picture.display_sign(@@current_user.sign)
-  puts "Ah yes, but of course. I can see that you are a ".light_yellow +  "#{@@current_user.sign}".light_blue.bold + ", #{@@current_user.name}. Your horoscope today is quite intriguing...".light_yellow
+  fetched_horoscope = $current_user.h_daily
+  Picture.display_sign($current_user.sign)
+  puts "Ah yes, but of course. I can see that you are a ".light_yellow +  "#{$current_user.sign}".light_blue.bold + ", #{$current_user.name}. Your horoscope today is quite intriguing...".light_yellow
   puts ""
   puts fetched_horoscope
   puts ""
@@ -226,10 +234,10 @@ def daily_horoscope
     system("clear")
     mood_assignment = mood_menu
     system("clear")
-    Favorite.create(user_id: @@current_user.id, saved_horoscope: fetched_horoscope, horoscope_mood: mood_assignment)
-    puts "Very insightful, #{@@current_user.name}. We've saved this to your favorites.".light_yellow
+    Favorite.create(user_id: $current_user.id, saved_horoscope: fetched_horoscope, horoscope_mood: mood_assignment)
+    puts "Very insightful, #{$current_user.name}. We've saved this to your favorites.".light_yellow
     sleep 2
-    @@current_user.reload
+    $current_user.reload
     main_menu
   else
     system("clear")
@@ -254,10 +262,10 @@ def make_horoscope
     system("clear")
     mood_assignment = mood_menu
     system("clear")
-    Favorite.create(user_id: @@current_user.id, horoscope_id: @@random_template.id, saved_horoscope: finished_template, horoscope_mood: mood_assignment)
-    puts "Very insightful, #{@@current_user.name}. We've saved this to your favorites.".light_yellow
+    Favorite.create(user_id: $current_user.id, horoscope_id: @@random_template.id, saved_horoscope: finished_template, horoscope_mood: mood_assignment)
+    puts "Very insightful, #{$current_user.name}. We've saved this to your favorites.".light_yellow
     sleep 2
-    @@current_user.reload
+    $current_user.reload
     main_menu
   else
     system("clear")
@@ -273,7 +281,7 @@ def view_favorites
   system("clear")
 
   prompt = TTY::Prompt.new
-  @@current_user.list_all_favorites
+  $current_user.list_all_favorites
 
   favorites_selection = prompt.select("What would you like to do?".light_blue.bold, active_color: :cyan) do |fav|
     fav.choice 'Delete A Favorite', 1
@@ -286,32 +294,32 @@ def view_favorites
 ### START DELETE SECTION
    when 1
     fav_delete_selection = prompt.ask("Which favorite would you like to delete? Enter the number:".light_blue.bold)
-      if fav_delete_selection.to_i > @@current_user.favorites.length || fav_delete_selection.to_i == 0
+      if fav_delete_selection.to_i > $current_user.favorites.length || fav_delete_selection.to_i == 0
         system("clear")
         puts "That doesn't seem to be a valid selection. Please try again.".light_yellow
         sleep 2
         view_favorites
       end
-    del_id = @@current_user.favorites[fav_delete_selection.to_i - 1].id
+    del_id = $current_user.favorites[fav_delete_selection.to_i - 1].id
     Favorite.destroy(del_id)
     system("clear")
     puts "We didn't like that one anyway. Returning to the lobby.".light_yellow
     sleep 2
-    @@current_user.reload
+    $current_user.reload
     main_menu
 
 
    when 2
 ### START UPDATE SECTION
     fav_update_selection = prompt.ask("Which favorite would you like to update?".light_blue.bold)
-    if fav_update_selection.to_i > @@current_user.favorites.length || fav_update_selection.to_i == 0
+    if fav_update_selection.to_i > $current_user.favorites.length || fav_update_selection.to_i == 0
       system("clear")
       puts "That doesn't seem to be a valid selection. Please try again.".light_yellow
       sleep 2
       return view_favorites
     end
     system("clear")
-    update_id = @@current_user.favorites[fav_update_selection.to_i - 1].id
+    update_id = $current_user.favorites[fav_update_selection.to_i - 1].id
     temp_fav = Favorite.find_by(id: update_id)
     if !temp_fav.horoscope_id
       temp_fav_mood_assignment = mood_menu
@@ -319,12 +327,12 @@ def view_favorites
       fav_to_be_updated.update(horoscope_mood: temp_fav_mood_assignment)
       puts "Oh yes, another profound insight. We've saved this to your favorites. Returning to the lobby.".light_yellow
       sleep 2
-      @@current_user.reload
+      $current_user.reload
       view_favorites
     else
       prompt = TTY::Prompt.new
 
-      template_sign = @@current_user.sign
+      template_sign = $current_user.sign
       planet = prompt.ask('Enter your favorite PLANET:'.light_blue.bold, active_color: :cyan)
       noun = prompt.ask('Enter a NOUN (names a person, place, thing, or idea):'.light_blue.bold, active_color: :cyan)
       adjective = prompt.ask('Enter an ADJECTIVE (this gives info about size, shape, age, color, material):'.light_blue.bold, active_color: :cyan)
@@ -346,9 +354,9 @@ def view_favorites
         system("clear")
         fav_temp_to_be_updated = Favorite.find_by(id: update_id)
         fav_temp_to_be_updated.update(saved_horoscope: completed_template, horoscope_mood: mood_assignment)
-        puts "Very insightful, #{@@current_user.name}. We've saved this to your favorites.".light_yellow
+        puts "Very insightful, #{$current_user.name}. We've saved this to your favorites.".light_yellow
         sleep 2
-        @@current_user.reload
+        $current_user.reload
         main_menu
       else
         system("clear")
@@ -361,7 +369,7 @@ def view_favorites
 ### START VIEW BY MOOD SECTION
    when 3
      system("clear")
-     view_by_mood_selection = @@current_user.mood_menu_hash
+     view_by_mood_selection = $current_user.mood_menu_hash
     if view_by_mood_selection.length == 0
       system("clear")
       puts "You don't have any favorites, traveler. Time to find some. Returning to the lobby.".light_yellow
@@ -371,8 +379,8 @@ def view_favorites
       system("clear")
       temp_mood = prompt.select('Pick a mood to view.'.light_blue.bold, view_by_mood_selection, active_color: :cyan)
       system("clear")
-      temp_mood_horo_list = @@current_user.m_list(temp_mood)
-      @@current_user.display_mood_list(temp_mood_horo_list)
+      temp_mood_horo_list = $current_user.m_list(temp_mood)
+      $current_user.display_mood_list(temp_mood_horo_list)
       post_mood_view = prompt.select("Return To Favorites?".light_blue.bold, %w(Yes), active_color: :cyan)
       if post_mood_view == "Yes"
         view_favorites
