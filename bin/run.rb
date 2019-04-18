@@ -8,11 +8,15 @@ $VERBOSE = nil
   #PARAGRAPH: none (white default)
   # SELECT MENU: .light_blue.bold, active_color: :cyan
 
+######## HELPER METHODS ########
+
+# validates whether a passed in date is a valid date
 def birthdate_validate(birthdate)
   bday_split = birthdate.split("/")
   return Date.valid_date?(bday_split[0].to_i,bday_split[1].to_i,bday_split[2].to_i)
 end
 
+# calculates zodiac sign given a passed birthdate
 def find_zodiac_sign(birthdate)
   bday_split = birthdate.split("/")
   return Date.new(bday_split[0].to_i,bday_split[1].to_i,bday_split[2].to_i).zodiac_sign
@@ -53,26 +57,24 @@ def template_smush(template_sign, planet, adverb, adjective, verb, noun)
   ERB.new(template_text).result(binding)
 end
 
-#//// BEGIN PROGRAM //////
+######## PROGRAM START ########
 
 # start of welcome screen
-
 def welcome
+  # header
   system("clear")
   font = TTY::Font.new(:doom)
   puts font.write("Mystic").light_blue
   puts font.write("Lodge").light_blue
-  puts ""
-
-  prompt = TTY::Prompt.new
-
-  puts "🌙 🌙".blink + " || W E L C O M E || ".light_blue.bold + "🌙 🌙".blink
+  puts "\n🌙 🌙".blink + " * ~ W E L C O M E ~ * ".light_blue.bold + "🌙 🌙\n".blink
   puts ""
   puts "Greetings, Cosmic Travler! Welcome to The Mystic Lodge.".light_yellow
   puts ""
   puts"Enter the lodge to find wisdom and guidance for all of life's questions.".light_yellow
   puts ""
 
+  # selection menu
+  prompt = TTY::Prompt.new
   welcome_selection = prompt.select("What shall we do?".light_blue.bold, %w(Login Signup Exit), active_color: :cyan)
 
   if welcome_selection == 'Login'
@@ -83,17 +85,16 @@ def welcome
     exit_cli
   end
 end
-### end of welcome screen
+# end of welcome screen
 
-### start of login screen
+# login screen
 def login_menu
   system("clear")
-
   prompt = TTY::Prompt.new
   crystal = prompt.decorate('🔮 ')
   prompt.collect do
     username = key(:name).ask("Tell us your name:".light_blue.bold, active_color: :cyan, required: true)
-
+    # validate taht a name exists in Users
     if !User.find_by(name: username)
       puts "I'm sorry, traveler. I don't believe we've met. Try again. Returning to the lobby".light_yellow
       sleep 2
@@ -101,11 +102,13 @@ def login_menu
     else
       if User.find_by(name: username)
         user_password = key(:password).mask("Enter your passcode:".light_blue.bold, required: true, mask: crystal)
+        # validate that this user's password matches what is stored
         if !User.find_by(password: user_password)
           puts "I'm sorry, traveler. That passcode isn't correct. Please try again. Returning to the lobby.".light_yellow
           sleep 2.5
           welcome
         else
+          # if both username and password match what is stored, move on to Main Menu
           @@current_user = User.find_by(name: username)
           main_menu
         end
@@ -113,19 +116,22 @@ def login_menu
     end
   end
 end
-### end of login screen
+# end of login screen
 
-### start of signup screen
+#////////////////////////////////////
+
+# start of signup screen
 def signup_menu
   system("clear")
-
   prompt = TTY::Prompt.new
   crystal = prompt.decorate('🔮 ')
   prompt.collect do
 
   username = key(:name).ask("Enter a username:".light_blue.bold, active_color: :cyan, required: true)
+    # validate that a username is unique
     if User.find_by(name: username)
       counter = 3
+      # user has 3 attempts to enter a username that does not exist in stored table
       until counter == 1 || !User.find_by(name: username)
         if counter == 1
           puts "Sorry traveler, those usernames are taken. Take a moment to think of a new one. Returning to the lobby.".light_yellow
@@ -137,9 +143,10 @@ def signup_menu
         username = key(:name).ask("Enter a username. You have #{counter} attempt(s) left.".light_yellow, active_color: :cyan, required: true)
       end
     end
+  # collect birthdate from user (to calculate zodiac sign)
   user_birthdate = key(:birthdate).ask("Enter your full birthdate (YYYY/MM/DD):".light_blue.bold, active_color: :cyan)
   bday_boolean = birthdate_validate(user_birthdate)
-
+  # if birthdate given is not valid, user has 3 attempts to enter a valid date
   if !bday_boolean
     counter = 3
     until bday_boolean
@@ -148,29 +155,30 @@ def signup_menu
         sleep 3
         welcome
       end
-
       puts "Sorry, travler. That doesn't appear to be a valid date. Please check your format and try again.".light_yellow
       counter -= 1
       user_birthdate = key(:birthdate).ask("Enter your full birthdate (YYYY/MM/DD): You have #{counter} attempt(s) left.".light_yellow)
       bday_boolean = birthdate_validate(user_birthdate)
-
     end
   end
+  # after username and birthdate are validated, calculate and save zodiac sign
   user_sign = find_zodiac_sign(user_birthdate)
+  # store user password
   user_password = key(:password).mask("Enter a passcode:".light_blue.bold, active_color: :cyan, required: true, mask: crystal)
   @@current_user = User.create(name: username, password: user_password, birthdate: user_birthdate, sign: user_sign)
-
   main_menu
   end
 end
-  ### end of signup screen
+# end of signup screen
 
-  ### start of main menu screen
+#////////////////////////////////////
+
+# start of main menu screen
 def main_menu
+  #header
   system("clear")
-
-  puts"Astrology is the ancient science of interpreting how the movements of the planets, stars and other heavenly bodies may impact our lives.".light_yellow
-  puts ""
+  puts"Astrology is the ancient science of interpreting how the movements of the planets, stars and other heavenly bodies may impact our lives.\n\n".light_yellow
+  Picture.display
 
   prompt = TTY::Prompt.new
   main_selection = prompt.select("Choose your own adventure:".light_blue.bold, active_color: :cyan) do |option|
@@ -206,6 +214,7 @@ def daily_horoscope
 
   prompt = TTY::Prompt.new
   fetched_horoscope = @@current_user.h_daily
+  Picture.display_sign(@@current_user.sign)
   puts "Ah yes, but of course. I can see that you are a ".light_yellow +  "#{@@current_user.sign}".light_blue.bold + ", #{@@current_user.name}. Your horoscope today is quite intriguing...".light_yellow
   puts ""
   puts fetched_horoscope
@@ -386,7 +395,7 @@ def exit_cli
   puts "May the great spirit guide you... 💫 ✨ 🌙".light_blue
   sleep 2
   system("clear")
-  system("^C")
+  abort
 end
 
 welcome

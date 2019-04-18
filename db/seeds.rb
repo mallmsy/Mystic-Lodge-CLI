@@ -5,11 +5,6 @@ Horoscope.destroy_all
 Favorite.reset_pk_sequence
 User.reset_pk_sequence
 Horoscope.reset_pk_sequence
-
-mallory = User.create(name: "Mallory", password: "password", birthdate: "1988-12-15", sign: "Sagittarius")
-gino = User.create(name: "Gino", password: "password", birthdate: "1991-06-28", sign: "Cancer")
-luka = User.create(name: "Luka", password: "password", birthdate: "1993-02-01", sign: "Aquarius")
-
 # #
 
 Horoscope.create(horoscope_template: "Greetings, <%=template_sign%>. You are apt to feel a major shift this week as <%=planet%> links with Libra. You will begin to attract new <%=noun%> who will expand your horizons and further your growth. <%=planet%> will <%=adverb%> add <%=adjective%> to your house of partnerships during this period so that it will be the time to consider your options: <%=verb%>, marry, or form a business alliance.")
@@ -27,3 +22,9 @@ Horoscope.create(horoscope_template: "A new <%=noun%> can open a door for you, d
 Horoscope.create(horoscope_template: "You may find an important missing <%=noun%>, as <%=planet%> harmonizes with Pluto. You may be delighted to find that it includes <%=adjective%> information you’ve been looking for. Now is the time to <%=verb%> with confidence, dear <%=template_sign%>. If you need information fast, your grandparents or a distant relative will likely be a godsend. Use their wisdom <%=adverb%>!")
 
 Horoscope.create(horoscope_template: "Mental endurance will be important for you, <%=template_sign%>, as Jupiter (the planet of the mind) joins forces with <%=planet%>. You’ll be faced with a choice regarding <%=noun%> and looking <%=adverb%> to the long-term will be advantageous. You may need to <%=verb%> a trusted friend or other expert, for you may discover a mistake that requires <%=adjective%> advice.")
+
+Horoscope.create(horoscope_template: "As the Moon enters your sign, <%=template_sign%>, this transit may cloud your head with <%=noun%>. This may have an impact on your productivity, but heed the wisdom of <%=planet%>. If you come across any <%=adjective%> situation today, do not <%=verb%> into conclusions instead act with a cool head after a <%=adverb%> observation.")
+
+Horoscope.create(horoscope_template: "Today, dear <%=template_sign%>, your stars will align with <%=planet%> and <%=verb%> you with good luck in everything you do. This will keep you <%=adjective%> throughout the day and nothing will hold you back. Do not get into any kind of <%=noun%> today and express your opinions <%=adverb%>.")
+
+Horoscope.create(horoscope_template: "You may be attempting something quite difficult, dear <%=template_sign%> but with the presence of <%=planet%> in Virgo, you can <%=adverb%> achieve what you are looking for but you must make the effort. Take time to reflect and <%=verb%> with a clear mind especially when it comes to work. Do not hurry or you may end up making <%=adjective%> mistakes. Most importantly you need to understand your <%=noun%> fully before you take any actions.")
