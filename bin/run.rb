@@ -10,7 +10,7 @@ $VERBOSE = nil
 
 ######## HELPER METHODS ########
 
-# validates whether a passed in date is a valid date
+# validates whether a passed in date is valid
 def birthdate_validate(birthdate)
   bday_split = birthdate.split("/")
   return Date.valid_date?(bday_split[0].to_i,bday_split[1].to_i,bday_split[2].to_i)
@@ -22,11 +22,13 @@ def find_zodiac_sign(birthdate)
   return Date.new(bday_split[0].to_i,bday_split[1].to_i,bday_split[2].to_i).zodiac_sign
 end
 
+# displays menu of mood options
 def mood_menu
   prompt = TTY::Prompt.new
   prompt.select("What emotion does this make you feel?".light_blue.bold, %w(Joy Trust Fear Surprise Sadness Disgust Anger Anticipation), active_color: :cyan)
 end
 
+# populates madlib horoscope template
 def populate_template
   prompt = TTY::Prompt.new
 
@@ -53,12 +55,14 @@ def populate_template
   completed_template
 end
 
+# saves updates to template horoscope
 def updated_template_smush(template_sign, planet, adverb, adjective, verb, noun, favorite_id)
   @@update_template = Horoscope.find_by(id: favorite_id)
   template_text = @@update_template.horoscope_template
   ERB.new(template_text).result(binding)
 end
 
+# saves template horoscope
 def template_smush(template_sign, planet, adverb, adjective, verb, noun)
   @@random_template = Horoscope.all.sample
   template_text = @@random_template.horoscope_template
@@ -202,6 +206,7 @@ def main_menu
   when 2
     make_horoscope
   when 3
+    # validates that user has favorites
     if $current_user.favorites.empty?
       system("clear")
       puts "Looks like you don't have any favorites, traveler. Returning to lobby.".light_yellow
@@ -221,7 +226,9 @@ def daily_horoscope
   system("clear")
 
   prompt = TTY::Prompt.new
+  # uses h_daily instance method to find scrape daily horoscope for current user based on zodiac sign
   fetched_horoscope = $current_user.h_daily
+  # inserts image of current user's horoscope sign
   Picture.display_sign($current_user.sign)
   puts "Ah yes, but of course. I can see that you are a ".light_yellow +  "#{$current_user.sign}".light_blue.bold + ", #{$current_user.name}. Your horoscope today is quite intriguing...".light_yellow
   puts ""
@@ -255,6 +262,7 @@ def make_horoscope
   prompt = TTY::Prompt.new
 
   puts "Let's create a new horoscope. Enter keywords below.".light_yellow
+  # collects keywords and populates template - see instance methods in User
   puts finished_template = populate_template
 
   save_template_selection = prompt.select('Would you like to save this wisdom?'.light_blue.bold, %w(Yes No), active_color: :cyan)
@@ -294,6 +302,7 @@ def view_favorites
 ### START DELETE SECTION
    when 1
     fav_delete_selection = prompt.ask("Which favorite would you like to delete? Enter the number:".light_blue.bold)
+      # validates that user enters a number that corresponds to existing favorite
       if fav_delete_selection.to_i > $current_user.favorites.length || fav_delete_selection.to_i == 0
         system("clear")
         puts "That doesn't seem to be a valid selection. Please try again.".light_yellow
@@ -312,6 +321,7 @@ def view_favorites
    when 2
 ### START UPDATE SECTION
     fav_update_selection = prompt.ask("Which favorite would you like to update?".light_blue.bold)
+    # validates that user enters a number that corresponds to existing favorite
     if fav_update_selection.to_i > $current_user.favorites.length || fav_update_selection.to_i == 0
       system("clear")
       puts "That doesn't seem to be a valid selection. Please try again.".light_yellow
@@ -321,6 +331,7 @@ def view_favorites
     system("clear")
     update_id = $current_user.favorites[fav_update_selection.to_i - 1].id
     temp_fav = Favorite.find_by(id: update_id)
+    # checks what type of horoscope the selection is (template or daily) - daily only updates mood.
     if !temp_fav.horoscope_id
       temp_fav_mood_assignment = mood_menu
       fav_to_be_updated = Favorite.find_by(id: update_id)
@@ -331,7 +342,7 @@ def view_favorites
       view_favorites
     else
       prompt = TTY::Prompt.new
-
+      # updates only keywords for selected template horoscope
       template_sign = $current_user.sign
       planet = prompt.ask('Enter your favorite PLANET:'.light_blue.bold, active_color: :cyan)
       noun = prompt.ask('Enter a NOUN (names a person, place, thing, or idea):'.light_blue.bold, active_color: :cyan)
@@ -370,12 +381,14 @@ def view_favorites
    when 3
      system("clear")
      view_by_mood_selection = $current_user.mood_menu_hash
+     # validates that user has favorites to view
     if view_by_mood_selection.length == 0
       system("clear")
       puts "You don't have any favorites, traveler. Time to find some. Returning to the lobby.".light_yellow
       sleep 2
       view_favorites
     else
+      # custom list of moods based on user's own horoscope mood assignments
       system("clear")
       temp_mood = prompt.select('Pick a mood to view.'.light_blue.bold, view_by_mood_selection, active_color: :cyan)
       system("clear")
