@@ -8,9 +8,9 @@ First project completed for Flatiron School. Daily horoscope pulled live using n
 ## Getting Started
 `bundle install`
 
-`rake db:seed`
-
 `rake db:migrate`
+
+`rake db:seed`
 
 `ruby bin/run.rb`
 
